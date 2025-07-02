@@ -1,0 +1,38 @@
+name: Test Claude Code Hooks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Make scripts executable
+      run: |
+        chmod +x run_tests.sh
+        chmod +x hooks/scripts/*.sh
+        chmod +x tests/*.sh
+    
+    - name: Run tests
+      run: ./run_tests.sh
+    
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}
+        path: |
+          tests/*.log
+          tests/*.out
+        retention-days: 7
