@@ -4,6 +4,33 @@
 
 A collection of hooks for Claude Code to enhance git workflow security and enforce best practices.
 
+## Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/sapientpants/claude-code-hooks.git
+
+# Copy hooks to your project
+cp -r claude-code-hooks/hooks your-project/
+cd your-project
+
+# Configure Claude Code to use the hooks
+mkdir -p .claude
+cp hooks/claude-code-hooks.json .claude/settings.json
+
+# Test that it works
+python3 hooks/scripts/block-git-no-verify.py < /dev/null
+# Should exit without error
+```
+
+## Requirements
+
+- **Python 3.6 or higher** - Check your version with `python3 --version`
+  - macOS: Pre-installed
+  - Ubuntu/Debian: `sudo apt-get install python3`
+  - Windows: Download from [python.org](https://www.python.org/downloads/)
+- **Claude Code CLI** - The hooks are designed to work with Claude Code
+
 ## Overview
 
 This repository provides pre-configured hooks for Claude Code that help enforce development standards and prevent potentially unsafe operations.
@@ -28,9 +55,17 @@ This repository provides pre-configured hooks for Claude Code that help enforce 
 
 ## Installation
 
+### Prerequisites Check
+First, ensure Python is available:
+```bash
+python3 --version
+# Should show Python 3.6 or higher
+```
+
 ### Method 1: Project-specific installation (Recommended)
-1. Copy the `hooks` directory to your project root
-2. Add the hook configuration to your project's Claude Code settings:
+1. Clone this repository or download the `hooks` directory
+2. Copy the `hooks` directory to your project root
+3. Add the hook configuration to your project's Claude Code settings:
 
 ```bash
 # Create .claude directory if it doesn't exist
@@ -50,7 +85,7 @@ Or manually add to `.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/block-git-no-verify.sh"
+            "command": "./hooks/scripts/block-git-no-verify.py"
           }
         ]
       }
@@ -75,7 +110,7 @@ cp -r hooks ~/.claude-hooks
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude-hooks/scripts/block-git-no-verify.sh"
+            "command": "~/.claude-hooks/scripts/block-git-no-verify.py"
           }
         ]
       }
@@ -84,8 +119,6 @@ cp -r hooks ~/.claude-hooks
 }
 ```
 
-### Method 3: Using Claude Code's /hooks command
-You can also configure hooks interactively using Claude Code's `/hooks` slash command.
 
 ## Usage
 
@@ -115,43 +148,40 @@ Run the test suite to verify the hooks work correctly:
 
 To test a specific hook:
 ```bash
-./tests/test_block_git_no_verify.sh
+./tests/test_block_git_no_verify.py
 ```
 
 ## Troubleshooting
 
+### "python3: command not found"
+- Install Python 3 using the instructions in the Requirements section
+- On some systems, try `python` instead of `python3`
+
 ### Hook not triggering
-1. Verify the hook configuration is loaded:
-   - Check `~/.claude/settings.json` or `.claude/settings.json`
-   - Use the `/hooks` command in Claude Code to view active hooks
-
-2. Ensure the hook script is executable:
-   ```bash
-   chmod +x hooks/scripts/block-git-no-verify.sh
+1. Check if the hook is loaded in Claude Code:
    ```
+   /hooks
+   ```
+   
+2. Verify Python can run the script:
+   ```bash
+   python3 hooks/scripts/block-git-no-verify.py < /dev/null
+   ```
+   
+3. Ensure the path in `.claude/settings.json` is correct (relative to your project root)
 
-3. Check the hook script path is correct in your settings
+### "Permission denied" error
+```bash
+chmod +x hooks/scripts/block-git-no-verify.py
+```
 
-### Permission errors
-- Hooks run with your user permissions
-- Ensure the hook scripts have execute permissions
-- Use absolute paths if relative paths aren't working
+## How It Works
 
-## Configuration
+The hook configuration in `.claude/settings.json` tells Claude Code to run `block-git-no-verify.py` before executing any Bash commands. The Python script:
 
-The hooks are configured in `hooks/claude-code-hooks.json`. The configuration uses Claude Code's hook system to run validation scripts before tool execution.
-
-### Configuration Structure
-- **Event**: `PreToolUse` - Runs before the tool executes
-- **Matcher**: `Bash` - Applies to bash commands
-- **Command**: Path to the hook script to execute
-
-## Security Considerations
-
-- Hooks run with full user permissions
-- Always review hook scripts before installation
-- Be cautious with hooks from untrusted sources
-- Test hooks in a safe environment first
+1. Receives the command details from Claude Code as JSON
+2. Checks if it's a git command with `--no-verify` 
+3. Blocks the command if found, allows it otherwise
 
 ## Contributing
 
