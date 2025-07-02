@@ -4,31 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the `claude-code-hooks` repository, currently in its initial state with only a LICENSE file. The repository appears to be intended for developing Git hooks or tooling related to Claude integration.
+This is the `claude-code-hooks` repository, which provides hooks for Claude Code to enforce development best practices. The hooks use Claude Code's JSON-based hook interface.
 
-## Repository Status
+## Project Structure
 
-- **Current State**: Empty repository with MIT license
-- **No build system, dependencies, or code structure established yet**
+```
+claude-code-hooks/
+├── hooks/
+│   ├── claude-code-hooks.json    # Hook configuration
+│   └── scripts/
+│       └── block-git-no-verify.py # Hook implementation
+├── tests/
+│   └── test_block_git_no_verify.py # Test suite
+├── run_tests.sh                    # Test runner
+└── README.md                       # User documentation
+```
 
-## Development Guidance
+## Development Commands
 
-Since this is a new repository without established patterns:
+- **Run all tests**: `./run_tests.sh`
+- **Run specific test**: `python3 tests/test_block_git_no_verify.py`
 
-1. **Before implementing features**: Ask the user about:
-   - The intended purpose and functionality
-   - Preferred technology stack (Node.js, Python, Shell, etc.)
-   - Target audience and use cases
+## Hook Development Guidelines
 
-2. **When setting up the project**: Consider:
-   - Creating appropriate directory structure based on chosen technology
-   - Setting up configuration files (package.json, requirements.txt, etc.)
-   - Establishing testing and linting frameworks
+1. **Hook Interface**: Hooks receive JSON via stdin with:
+   - `tool_name`: The Claude Code tool being called
+   - `tool_input`: Tool-specific parameters
+   - `session_id`: Unique session identifier
+   - `transcript_path`: Path to conversation JSON
 
-3. **Repository Remote**: `git@github.com:sapientpants/claude-code-hooks.git`
+2. **Exit Codes**:
+   - `0`: Allow tool execution
+   - `2`: Block with error message (stderr is shown to user)
+   - Other: Non-blocking error
+
+3. **Implementation Language**: Python 3 (for reliable JSON handling)
+
+4. **Testing**: All hooks must have comprehensive test coverage
 
 ## Important Notes
 
-- No existing code patterns or conventions to follow yet
-- No build, test, or lint commands configured
+- Hooks run with full user permissions
+- Always fail open (allow on error) for safety
+- Test with actual Claude Code JSON interface
+- Repository Remote: `git@github.com:sapientpants/claude-code-hooks.git`
 - License: MIT (Copyright 2025 sapientpants)

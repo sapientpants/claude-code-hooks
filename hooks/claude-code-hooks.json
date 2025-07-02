@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/block-git-no-verify.sh"
+            "command": "./hooks/scripts/block-git-no-verify.py"
           }
         ]
       }

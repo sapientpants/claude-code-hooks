@@ -13,8 +13,8 @@ echo -e "${BLUE}Claude Code Hooks Test Suite${NC}"
 echo "============================"
 echo
 
-# Find all test scripts in the tests directory
-test_files=$(find tests -name "test_*.sh" -type f | sort)
+# Find all test scripts in the tests directory (both .sh and .py)
+test_files=$(find tests \( -name "test_*.sh" -o -name "test_*.py" \) -type f | sort)
 
 if [ -z "$test_files" ]; then
     echo -e "${RED}No test files found in tests directory${NC}"
@@ -28,7 +28,14 @@ all_passed=true
 for test_file in $test_files; do
     echo -e "${BLUE}Running: $test_file${NC}"
     
-    if bash "$test_file"; then
+    # Determine how to run the test based on extension
+    if [[ "$test_file" == *.sh ]]; then
+        runner="bash"
+    elif [[ "$test_file" == *.py ]]; then
+        runner="python3"
+    fi
+    
+    if $runner "$test_file"; then
         echo -e "${GREEN}✓ $test_file passed${NC}"
     else
         echo -e "${RED}✗ $test_file failed${NC}"
